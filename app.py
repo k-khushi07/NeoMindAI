@@ -1,19 +1,5 @@
-import os
-import sqlite3
-import time
-from typing import Annotated
-from typing_extensions import TypedDict
 import streamlit as st
-
-# ─── LangGraph & LangChain Imports ──────────────────────────────────────────
-from langgraph.graph import StateGraph, START, END
-from langgraph.graph.message import add_messages
-from langgraph.checkpoint.sqlite import SqliteSaver
-from langchain_groq import ChatGroq
-from langchain_core.messages import HumanMessage
-
-# Secure your key via environment variables or streamlit secrets in production
-os.environ["GROQ_API_KEY"] = "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"
+import time
 
 # ─── Page Config ────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -26,7 +12,7 @@ st.set_page_config(
 # ─── Custom CSS ─────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -97,32 +83,6 @@ html, body, [class*="css"] {
 """, unsafe_allow_html=True)
 
 
-# ─── LangGraph Setup Schema & Compilation ──────────────────────────────────
-class State(TypedDict):
-    messages: Annotated[list, add_messages]
-
-@st.cache_resource
-def get_compiled_graph():
-    """Builds and compiles the LangGraph system exactly once, caching across runs."""
-    llm = ChatGroq(model="llama-3.1-8b-instant")
-
-    def chatbot(state: State):
-        response = llm.invoke(state["messages"])
-        return {"messages": [response]}
-
-    builder = StateGraph(State)
-    builder.add_node("chatbot", chatbot)
-    builder.add_edge(START, "chatbot")
-    builder.add_edge("chatbot", END)
-
-    conn = sqlite3.connect("chat_history.db", check_same_thread=False)
-    memory = SqliteSaver(conn)
-    return builder.compile(checkpointer=memory)
-
-# Instantiate the working graph backend
-graph_agent = get_compiled_graph()
-
-
 # ─── Session State ───────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -130,44 +90,19 @@ if "mode" not in st.session_state:
     st.session_state.mode = "general"
 if "uploaded_docs" not in st.session_state:
     st.session_state.uploaded_docs = []
-# Ensure a persistent conversation thread ID exists for SQLite memory tracking
-if "thread_id" not in st.session_state:
-    st.session_state.thread_id = f"streamlit_session_{int(time.time())}"
 
 
 # ─── Constants ───────────────────────────────────────────────────────────────
 MODE_META = {
-    "general": {"label": "General Chat",  "icon": "🧠", "tag": "LLM",        "color": "#818cf8", "bg": "rgba(99,102,241,0.12)",  "desc": "Powered live by LangGraph + SQLite memory"},
+    "general": {"label": "General Chat",  "icon": "🧠", "tag": "LLM",        "color": "#818cf8", "bg": "rgba(99,102,241,0.12)",  "desc": "Answered by LLM directly"},
     "web":     {"label": "Web Search",    "icon": "🌐", "tag": "WEB",        "color": "#34d399", "bg": "rgba(52,211,153,0.12)",  "desc": "Live results from the internet"},
     "rag":     {"label": "RAG Mode",      "icon": "📄", "tag": "RAG",        "color": "#fbbf24", "bg": "rgba(251,191,36,0.12)",  "desc": "Answers from your documents"},
 }
 
 
-# ─── Live Backend Router ─────────────────────────────────────────────────────
-def live_agent_response(query, mode):
-    if mode == "general":
-        # Package data configuration context for LangGraph execution
-        config = {"configurable": {"thread_id": st.session_state.thread_id}}
-        user_message = HumanMessage(content=query)
-        
-        # Execute the workflow stream
-        events = graph_agent.stream(
-            {"messages": [user_message]}, 
-            config, 
-            stream_mode="values"
-        )
-        
-        final_reply = "I couldn't generate a response."
-        for event in events:
-            latest_message = event["messages"][-1]
-            if latest_message.type == "ai":
-                final_reply = latest_message.content
-        
-        # Note: Replace newlines with breaks to prevent HTML rendering from bunching text up
-        formatted_reply = final_reply.replace("\n", "<br>")
-        return formatted_reply, []
-
-    elif mode == "web":
+# ─── Placeholder Backend ─────────────────────────────────────────────────────
+def placeholder_response(query, mode):
+    if mode == "web":
         try:
             from duckduckgo_search import DDGS
             with DDGS() as ddgs:
@@ -182,8 +117,18 @@ def live_agent_response(query, mode):
                 return summary, sources
             else:
                 return "No results found for that query.", []
+        
         except Exception as e:
             return f"Web search failed: {str(e)}", []
+
+    elif mode == "general":
+        time.sleep(0.6)
+        return (
+            f"This is a <b>General Chat</b> placeholder.<br><br>"
+            f"Your query: <i>\"{query}\"</i><br><br>"
+            "Connect Groq LLM here to get real answers.",
+            []
+        )
 
     elif mode == "rag":
         time.sleep(0.6)
@@ -368,8 +313,6 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("🗑  Clear conversation", key="clear"):
         st.session_state.messages = []
-        # Reset memory thread id to start completely fresh in SQLite
-        st.session_state.thread_id = f"streamlit_session_{int(time.time())}"
         st.rerun()
 
 
@@ -450,7 +393,7 @@ if query:
         "mode": mode,
     })
     with st.spinner(""):
-        response_text, sources = live_agent_response(query, mode)
+        response_text, sources = placeholder_response(query, mode)
 
     st.session_state.messages.append({
         "role": "assistant",
