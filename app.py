@@ -12,169 +12,73 @@ st.set_page_config(
 # ─── Custom CSS ─────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-  /* Global */
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-  html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .stApp {
-    background-color: #09090b;
-    color: #fafafa;
-  }
+html, body, [class*="css"] {
+  font-family: 'Inter', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* Hide default streamlit chrome */
-  #MainMenu, footer, header { visibility: hidden; }
+.stApp { background-color: #0c0c0e; color: #f0f0f2; }
 
-  /* Sidebar */
-  [data-testid="stSidebar"] {
-    background-color: #111113 !important;
-    border-right: 1px solid rgba(255,255,255,0.06);
-  }
+#MainMenu, footer, header { visibility: hidden; }
 
-  [data-testid="stSidebar"] * {
-    color: #a1a1aa !important;
-  }
+/* ── Sidebar ── */
+[data-testid="stSidebar"] {
+  background: #0f0f12 !important;
+  border-right: 1px solid #1e1e24 !important;
+}
+[data-testid="stSidebar"] section { padding: 0 !important; }
 
-  /* Mode buttons */
-  .stButton > button {
-    width: 100%;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #a1a1aa;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.15s;
-    text-align: left;
-  }
+/* ── Sidebar buttons ── */
+.stButton > button {
+  width: 100%;
+  background: transparent !important;
+  border: 1px solid #1e1e24 !important;
+  color: #6b6b80 !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-align: left !important;
+  transition: all 0.15s ease !important;
+  letter-spacing: -0.1px !important;
+}
+.stButton > button:hover {
+  background: rgba(99,102,241,0.08) !important;
+  border-color: rgba(99,102,241,0.25) !important;
+  color: #a5b4fc !important;
+}
 
-  .stButton > button:hover {
-    background: rgba(99,102,241,0.1);
-    border-color: rgba(99,102,241,0.3);
-    color: #818cf8;
-  }
+/* ── Chat input ── */
+[data-testid="stChatInput"] {
+  background: #0f0f12 !important;
+  border-top: 1px solid #1e1e24 !important;
+  padding: 16px 24px !important;
+}
+[data-testid="stChatInput"] textarea {
+  background: #18181e !important;
+  border: 1px solid #2a2a35 !important;
+  border-radius: 12px !important;
+  color: #f0f0f2 !important;
+  font-size: 14px !important;
+  font-family: 'Inter', sans-serif !important;
+  padding: 12px 16px !important;
+}
+[data-testid="stChatInput"] textarea:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
+}
 
-  /* Chat messages */
-  .user-bubble {
-    display: flex;
-    justify-content: flex-end;
-    margin: 12px 0;
-  }
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 4px; }
 
-  .user-bubble .bubble {
-    background: #6366f1;
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 18px 18px 4px 18px;
-    max-width: 70%;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-
-  .agent-bubble {
-    display: flex;
-    justify-content: flex-start;
-    margin: 12px 0;
-    gap: 10px;
-    align-items: flex-start;
-  }
-
-  .agent-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-
-  .agent-bubble .bubble {
-    background: #18181b;
-    color: #e4e4e7;
-    padding: 12px 16px;
-    border-radius: 4px 18px 18px 18px;
-    max-width: 75%;
-    font-size: 14px;
-    line-height: 1.7;
-    border: 1px solid rgba(255,255,255,0.06);
-  }
-
-  .mode-badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 999px;
-    margin-bottom: 6px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .badge-llm    { background: rgba(99,102,241,0.15); color: #818cf8; }
-  .badge-web    { background: rgba(16,185,129,0.15); color: #34d399; }
-  .badge-rag    { background: rgba(245,158,11,0.15); color: #fbbf24; }
-
-  .source-card {
-    background: #1c1c1f;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: 8px 12px;
-    margin-top: 8px;
-    font-size: 12px;
-    color: #71717a;
-  }
-
-  .source-card a { color: #818cf8; text-decoration: none; }
-
-  /* Input */
-  .stChatInput textarea {
-    background: #18181b !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    color: #fafafa !important;
-    border-radius: 12px !important;
-    font-size: 14px !important;
-  }
-
-  /* Divider */
-  hr { border-color: rgba(255,255,255,0.06) !important; }
-
-  /* Metric cards */
-  .metric-card {
-    background: #111113;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
-    padding: 14px 16px;
-    text-align: center;
-  }
-  .metric-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #fafafa;
-  }
-  .metric-label {
-    font-size: 11px;
-    color: #52525b;
-    margin-top: 2px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* Section header */
-  .section-header {
-    font-size: 11px;
-    font-weight: 600;
-    color: #3f3f46;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin: 16px 0 8px;
-    padding: 0 4px;
-  }
+/* ── Spinner ── */
+.stSpinner > div { border-top-color: #6366f1 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -182,108 +86,167 @@ st.markdown("""
 # ─── Session State ───────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
 if "mode" not in st.session_state:
     st.session_state.mode = "general"
-
 if "uploaded_docs" not in st.session_state:
     st.session_state.uploaded_docs = []
 
 
-# ─── Helpers ─────────────────────────────────────────────────────────────────
+# ─── Constants ───────────────────────────────────────────────────────────────
 MODE_META = {
-    "general": {"label": "General Chat",  "badge": "badge-llm", "tag": "LLM",        "icon": "🧠", "desc": "LLM answers directly"},
-    "web":     {"label": "Web Search",    "badge": "badge-web", "tag": "WEB SEARCH",  "icon": "🌐", "desc": "Searches the internet"},
-    "rag":     {"label": "RAG Mode",      "badge": "badge-rag", "tag": "RAG",         "icon": "📄", "desc": "Searches your documents"},
+    "general": {"label": "General Chat",  "icon": "🧠", "tag": "LLM",        "color": "#818cf8", "bg": "rgba(99,102,241,0.12)",  "desc": "Answered by LLM directly"},
+    "web":     {"label": "Web Search",    "icon": "🌐", "tag": "WEB",        "color": "#34d399", "bg": "rgba(52,211,153,0.12)",  "desc": "Live results from the internet"},
+    "rag":     {"label": "RAG Mode",      "icon": "📄", "tag": "RAG",        "color": "#fbbf24", "bg": "rgba(251,191,36,0.12)",  "desc": "Answers from your documents"},
 }
 
-def render_message(msg):
-    role = msg["role"]
-    content = msg["content"]
-    mode = msg.get("mode", "general")
-    sources = msg.get("sources", [])
-    meta = MODE_META[mode]
 
-    if role == "user":
-        st.markdown(f"""
-        <div class="user-bubble">
-          <div class="bubble">{content}</div>
-        </div>""", unsafe_allow_html=True)
-    else:
-        sources_html = ""
-        if sources:
-            sources_html = "".join([
-                f'<div class="source-card">📎 <a href="{s.get("url","#")}" target="_blank">{s.get("title", s.get("url","Source"))}</a></div>'
-                for s in sources
-            ])
-
-        st.markdown(f"""
-        <div class="agent-bubble">
-          <div class="agent-avatar">🧠</div>
-          <div>
-            <span class="mode-badge {meta['badge']}">{meta['tag']}</span>
-            <div class="bubble">{content}{sources_html}</div>
-          </div>
-        </div>""", unsafe_allow_html=True)
-
-
+# ─── Placeholder Backend ─────────────────────────────────────────────────────
 def placeholder_response(query, mode):
     """
-    PLACEHOLDER — replace this function with your actual agent call.
-    Your teammate should replace this with:
+    REPLACE THIS with your actual agent call:
         from agent import run_agent
         return run_agent(query, mode, st.session_state.messages)
+    Returns: (response_html_string, list_of_source_dicts)
     """
-    time.sleep(0.8)  # simulate latency
-
+    time.sleep(0.6)
     responses = {
         "general": (
-            f"This is a <b>General Chat</b> response to: <i>{query}</i><br><br>"
-            "The LLM will answer this directly without using any external tools. "
-            "Connect your Groq/Ollama model here.",
+            f"This is a <b>General Chat</b> placeholder response.<br><br>"
+            f"Your query was: <i>\"{query}\"</i><br><br>"
+            "The Groq LLM will answer this directly. Plug in your agent to replace this.",
             []
         ),
         "web": (
-            f"Searching the web for: <i>{query}</i><br><br>"
-            "🔍 Top results would appear here after DuckDuckGo search. "
-            "Connect your web search tool to replace this placeholder.",
-            [{"title": "Example Result — Wikipedia", "url": "https://wikipedia.org"},
-             {"title": "Example Result — News Article", "url": "https://news.ycombinator.com"}]
+            f"Searching the web for: <i>\"{query}\"</i><br><br>"
+            "DuckDuckGo results will appear here once the backend is connected.",
+            [{"title": "Wikipedia — Example Result", "url": "https://wikipedia.org"},
+             {"title": "Hacker News — Example Result", "url": "https://news.ycombinator.com"}]
         ),
         "rag": (
-            f"Searching uploaded documents for: <i>{query}</i><br><br>"
-            "📄 Relevant chunks from your FAISS vector store would appear here. "
-            "Connect your RAG pipeline to replace this placeholder.",
-            [{"title": "Uploaded Document — Chunk 1", "url": "#"},
-             {"title": "Uploaded Document — Chunk 2", "url": "#"}]
+            f"Searching your documents for: <i>\"{query}\"</i><br><br>"
+            "Relevant chunks from your FAISS vector store will appear here.",
+            [{"title": "Uploaded Doc — Chunk 1", "url": "#"},
+             {"title": "Uploaded Doc — Chunk 2", "url": "#"}]
         ),
     }
     return responses[mode]
 
 
+# ─── Render Message ───────────────────────────────────────────────────────────
+def render_message(msg):
+    role    = msg["role"]
+    content = msg["content"]
+    mode    = msg.get("mode", "general")
+    sources = msg.get("sources", [])
+    meta    = MODE_META[mode]
+
+    if role == "user":
+        st.markdown(f"""
+        <div style="display:flex;justify-content:flex-end;margin:16px 0 4px;">
+          <div style="
+            background: linear-gradient(135deg,#6366f1,#7c3aed);
+            color:#fff;
+            padding:10px 16px;
+            border-radius:18px 18px 4px 18px;
+            max-width:68%;
+            font-size:14px;
+            line-height:1.65;
+            box-shadow:0 2px 12px rgba(99,102,241,0.25);
+          ">{content}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    else:
+        sources_html = ""
+        if sources:
+            items = "".join([
+                f"""<a href="{s.get('url','#')}" target="_blank" style="
+                  display:block;
+                  background:#1a1a22;
+                  border:1px solid #2a2a35;
+                  border-radius:8px;
+                  padding:7px 12px;
+                  margin-top:6px;
+                  font-size:12px;
+                  color:#818cf8;
+                  text-decoration:none;
+                  transition:border-color 0.15s;
+                ">🔗 {s.get('title', s.get('url','Source'))}</a>"""
+                for s in sources
+            ])
+            sources_html = f'<div style="margin-top:10px;">{items}</div>'
+
+        st.markdown(f"""
+        <div style="display:flex;align-items:flex-start;gap:12px;margin:16px 0 4px;">
+          <div style="
+            width:34px;height:34px;flex-shrink:0;
+            border-radius:10px;
+            background:linear-gradient(135deg,#6366f1,#7c3aed);
+            display:flex;align-items:center;justify-content:center;
+            font-size:17px;
+            box-shadow:0 2px 8px rgba(99,102,241,0.3);
+          ">🧠</div>
+          <div style="max-width:74%;">
+            <div style="
+              display:inline-flex;align-items:center;gap:5px;
+              background:{meta['bg']};
+              color:{meta['color']};
+              border-radius:6px;
+              padding:2px 9px;
+              font-size:10px;font-weight:700;
+              letter-spacing:0.06em;text-transform:uppercase;
+              margin-bottom:7px;
+            ">{meta['icon']} {meta['tag']}</div>
+            <div style="
+              background:#16161e;
+              border:1px solid #1e1e28;
+              color:#e4e4f0;
+              padding:13px 16px;
+              border-radius:4px 16px 16px 16px;
+              font-size:14px;line-height:1.7;
+            ">{content}{sources_html}</div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+
 # ─── Sidebar ─────────────────────────────────────────────────────────────────
 with st.sidebar:
+    # Logo
     st.markdown("""
-    <div style="padding: 8px 4px 16px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
-        <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:18px;">🧠</div>
+    <div style="padding:20px 16px 16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="
+          width:36px;height:36px;border-radius:10px;
+          background:linear-gradient(135deg,#6366f1,#7c3aed);
+          display:flex;align-items:center;justify-content:center;
+          font-size:18px;
+          box-shadow:0 2px 10px rgba(99,102,241,0.35);
+        ">🧠</div>
         <div>
-          <div style="font-size:15px;font-weight:700;color:#fafafa !important;">NeoMind AI</div>
-          <div style="font-size:11px;color:#52525b !important;">Intelligent Agent</div>
+          <div style="font-size:15px;font-weight:700;color:#f0f0f2;letter-spacing:-0.3px;">NeoMind AI</div>
+          <div style="font-size:11px;color:#3f3f52;margin-top:1px;">Intelligent Agent v1.0</div>
         </div>
       </div>
     </div>
+    <div style="height:1px;background:#1e1e24;margin:0 16px 16px;"></div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-header">Mode</div>', unsafe_allow_html=True)
+    # Mode selector
+    st.markdown('<div style="font-size:10px;font-weight:700;color:#3f3f52;letter-spacing:0.1em;text-transform:uppercase;padding:0 16px 8px;">Mode</div>', unsafe_allow_html=True)
 
     for key, meta in MODE_META.items():
-        active = "✓ " if st.session_state.mode == key else ""
-        if st.button(f"{meta['icon']}  {active}{meta['label']}", key=f"btn_{key}"):
+        is_active = st.session_state.mode == key
+        active_indicator = " ●" if is_active else ""
+        label = f"{meta['icon']}  {meta['label']}{active_indicator}"
+        if st.button(label, key=f"mode_{key}"):
             st.session_state.mode = key
             st.rerun()
 
-    st.markdown('<div class="section-header">Documents</div>', unsafe_allow_html=True)
+    st.markdown('<div style="height:1px;background:#1e1e24;margin:16px;"></div>', unsafe_allow_html=True)
+
+    # Documents
+    st.markdown('<div style="font-size:10px;font-weight:700;color:#3f3f52;letter-spacing:0.1em;text-transform:uppercase;padding:0 16px 8px;">Documents</div>', unsafe_allow_html=True)
 
     uploaded = st.file_uploader(
         "Upload for RAG",
@@ -295,94 +258,140 @@ with st.sidebar:
         for f in uploaded:
             if f.name not in st.session_state.uploaded_docs:
                 st.session_state.uploaded_docs.append(f.name)
-        st.success(f"{len(uploaded)} file(s) ready")
 
     if st.session_state.uploaded_docs:
         for doc in st.session_state.uploaded_docs:
-            st.markdown(f'<div class="source-card">📄 {doc}</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div style="
+              background:#16161e;border:1px solid #1e1e28;
+              border-radius:8px;padding:7px 12px;margin:4px 16px;
+              font-size:12px;color:#6b6b80;
+              display:flex;align-items:center;gap:6px;
+            ">📄 {doc}</div>
+            """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style="
+          margin:4px 16px;padding:10px 12px;
+          border:1px dashed #1e1e28;border-radius:8px;
+          font-size:12px;color:#3f3f52;text-align:center;
+        ">No documents uploaded</div>
+        """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-header">Session</div>', unsafe_allow_html=True)
+    st.markdown('<div style="height:1px;background:#1e1e24;margin:16px;"></div>', unsafe_allow_html=True)
+
+    # Stats
+    st.markdown('<div style="font-size:10px;font-weight:700;color:#3f3f52;letter-spacing:0.1em;text-transform:uppercase;padding:0 16px 8px;">Session</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"""
-        <div class="metric-card">
-          <div class="metric-value">{len(st.session_state.messages)}</div>
-          <div class="metric-label">Messages</div>
+        <div style="
+          background:#16161e;border:1px solid #1e1e28;
+          border-radius:10px;padding:12px;text-align:center;margin:0 4px 0 16px;
+        ">
+          <div style="font-size:22px;font-weight:700;color:#f0f0f2;">{len(st.session_state.messages)}</div>
+          <div style="font-size:10px;color:#3f3f52;text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">Msgs</div>
         </div>""", unsafe_allow_html=True)
     with col2:
         st.markdown(f"""
-        <div class="metric-card">
-          <div class="metric-value">{len(st.session_state.uploaded_docs)}</div>
-          <div class="metric-label">Docs</div>
+        <div style="
+          background:#16161e;border:1px solid #1e1e28;
+          border-radius:10px;padding:12px;text-align:center;margin:0 16px 0 4px;
+        ">
+          <div style="font-size:22px;font-weight:700;color:#f0f0f2;">{len(st.session_state.uploaded_docs)}</div>
+          <div style="font-size:10px;color:#3f3f52;text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">Docs</div>
         </div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("🗑  Clear Chat", key="clear"):
+    if st.button("🗑  Clear conversation", key="clear"):
         st.session_state.messages = []
         st.rerun()
 
 
-# ─── Main Area ───────────────────────────────────────────────────────────────
-current_mode = st.session_state.mode
-meta = MODE_META[current_mode]
+# ─── Main ────────────────────────────────────────────────────────────────────
+mode = st.session_state.mode
+meta = MODE_META[mode]
 
-# Header
+# Top header bar
 st.markdown(f"""
-<div style="padding: 24px 0 16px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 8px;">
-  <div style="display:flex; align-items:center; gap:10px;">
-    <span style="font-size:22px;">{meta['icon']}</span>
+<div style="
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 8px 18px;
+  border-bottom:1px solid #1e1e24;
+  margin-bottom:4px;
+">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div style="
+      width:40px;height:40px;border-radius:12px;
+      background:linear-gradient(135deg,#6366f1,#7c3aed);
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;
+      box-shadow:0 2px 12px rgba(99,102,241,0.3);
+    ">{meta['icon']}</div>
     <div>
-      <div style="font-size:18px; font-weight:700; color:#fafafa; letter-spacing:-0.4px;">
+      <div style="font-size:17px;font-weight:700;color:#f0f0f2;letter-spacing:-0.4px;">
         NeoMind — {meta['label']}
       </div>
-      <div style="font-size:12px; color:#52525b; margin-top:2px;">{meta['desc']}</div>
+      <div style="font-size:12px;color:#3f3f52;margin-top:2px;">{meta['desc']}</div>
     </div>
-    <span class="mode-badge {meta['badge']}" style="margin-left:auto;">{meta['tag']}</span>
   </div>
+  <div style="
+    background:{meta['bg']};color:{meta['color']};
+    border-radius:8px;padding:4px 12px;
+    font-size:11px;font-weight:700;
+    letter-spacing:0.08em;text-transform:uppercase;
+  ">{meta['tag']}</div>
 </div>
 """, unsafe_allow_html=True)
 
-# Chat history
-chat_container = st.container()
-with chat_container:
-    if not st.session_state.messages:
-        st.markdown("""
-        <div style="text-align:center; padding: 60px 20px; color: #3f3f46;">
-          <div style="font-size:40px; margin-bottom:12px;">🧠</div>
-          <div style="font-size:16px; font-weight:600; color:#52525b; margin-bottom:8px;">
-            Ask NeoMind anything
-          </div>
-          <div style="font-size:13px; color:#3f3f46;">
-            Switch modes in the sidebar — General, Web Search, or RAG
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        for msg in st.session_state.messages:
-            render_message(msg)
+# Chat area
+if not st.session_state.messages:
+    st.markdown(f"""
+    <div style="
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:80px 20px;text-align:center;
+    ">
+      <div style="
+        width:64px;height:64px;border-radius:18px;
+        background:linear-gradient(135deg,#6366f1,#7c3aed);
+        display:flex;align-items:center;justify-content:center;
+        font-size:30px;margin-bottom:20px;
+        box-shadow:0 4px 24px rgba(99,102,241,0.3);
+      ">🧠</div>
+      <div style="font-size:20px;font-weight:700;color:#f0f0f2;letter-spacing:-0.4px;margin-bottom:8px;">
+        How can I help you today?
+      </div>
+      <div style="font-size:14px;color:#3f3f52;max-width:340px;line-height:1.6;">
+        Ask me anything — I can chat, search the web, or answer from your documents.
+      </div>
+      <div style="display:flex;gap:10px;margin-top:28px;flex-wrap:wrap;justify-content:center;">
+        <div style="background:#16161e;border:1px solid #1e1e28;border-radius:10px;padding:10px 16px;font-size:13px;color:#6b6b80;">🧠 Explain machine learning</div>
+        <div style="background:#16161e;border:1px solid #1e1e28;border-radius:10px;padding:10px 16px;font-size:13px;color:#6b6b80;">🌐 Latest AI news today</div>
+        <div style="background:#16161e;border:1px solid #1e1e28;border-radius:10px;padding:10px 16px;font-size:13px;color:#6b6b80;">📄 Summarize my document</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    for msg in st.session_state.messages:
+        render_message(msg)
 
 # Input
-query = st.chat_input(f"Ask in {meta['label']} mode...")
+query = st.chat_input(f"Message NeoMind ({meta['label']})...")
 
 if query:
-    # Add user message
     st.session_state.messages.append({
         "role": "user",
         "content": query,
-        "mode": current_mode,
+        "mode": mode,
     })
+    with st.spinner(""):
+        response_text, sources = placeholder_response(query, mode)
 
-    # Get response (replace placeholder_response with your agent call)
-    with st.spinner("Thinking..."):
-        response_text, sources = placeholder_response(query, current_mode)
-
-    # Add agent message
     st.session_state.messages.append({
         "role": "assistant",
         "content": response_text,
-        "mode": current_mode,
+        "mode": mode,
         "sources": sources,
     })
-
     st.rerun()
