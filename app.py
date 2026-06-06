@@ -102,34 +102,41 @@ MODE_META = {
 
 # ─── Placeholder Backend ─────────────────────────────────────────────────────
 def placeholder_response(query, mode):
-    """
-    REPLACE THIS with your actual agent call:
-        from agent import run_agent
-        return run_agent(query, mode, st.session_state.messages)
-    Returns: (response_html_string, list_of_source_dicts)
-    """
-    time.sleep(0.6)
-    responses = {
-        "general": (
-            f"This is a <b>General Chat</b> placeholder response.<br><br>"
-            f"Your query was: <i>\"{query}\"</i><br><br>"
-            "The Groq LLM will answer this directly. Plug in your agent to replace this.",
+    if mode == "web":
+        try:
+            from duckduckgo_search import DDGS
+            with DDGS() as ddgs:
+                results = list(ddgs.text(query, max_results=4))
+            
+            if results:
+                summary = "<b>Here's what I found on the web:</b><br><br>"
+                for r in results:
+                    summary += f"• <b>{r['title']}</b><br>{r['body']}<br><br>"
+                
+                sources = [{"title": r["title"], "url": r["href"]} for r in results]
+                return summary, sources
+            else:
+                return "No results found for that query.", []
+        
+        except Exception as e:
+            return f"Web search failed: {str(e)}", []
+
+    elif mode == "general":
+        time.sleep(0.6)
+        return (
+            f"This is a <b>General Chat</b> placeholder.<br><br>"
+            f"Your query: <i>\"{query}\"</i><br><br>"
+            "Connect Groq LLM here to get real answers.",
             []
-        ),
-        "web": (
-            f"Searching the web for: <i>\"{query}\"</i><br><br>"
-            "DuckDuckGo results will appear here once the backend is connected.",
-            [{"title": "Wikipedia — Example Result", "url": "https://wikipedia.org"},
-             {"title": "Hacker News — Example Result", "url": "https://news.ycombinator.com"}]
-        ),
-        "rag": (
+        )
+
+    elif mode == "rag":
+        time.sleep(0.6)
+        return (
             f"Searching your documents for: <i>\"{query}\"</i><br><br>"
-            "Relevant chunks from your FAISS vector store will appear here.",
-            [{"title": "Uploaded Doc — Chunk 1", "url": "#"},
-             {"title": "Uploaded Doc — Chunk 2", "url": "#"}]
-        ),
-    }
-    return responses[mode]
+            "Connect FAISS + embeddings here for real RAG answers.",
+            [{"title": "Uploaded Doc — Chunk 1", "url": "#"}]
+        )
 
 
 # ─── Render Message ───────────────────────────────────────────────────────────
